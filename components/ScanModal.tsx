@@ -3,7 +3,8 @@ import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faTimes} from "@fortawesome/free-solid-svg-icons/faTimes";
 import {baseStyles} from "./BaseStyles";
 import {faSpinner} from "@fortawesome/free-solid-svg-icons/faSpinner";
-import {useCallback, useEffect, useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {ScanModalInfo} from "./ScanModalInfo";
 
 const images:Map<string, ImageSourcePropType> = new Map<string, ImageSourcePropType>();
 
@@ -23,12 +24,19 @@ images.set("white-glass", require("../assets/white-glass.png"));
 export function ScanModal(props : {item: string | null, visible: boolean, setVisible: (v: boolean) => void}) {
     const {item, visible, setVisible} = props;
     const img = images.get(item ?? "");
+    const mountedRef = useRef(true);
 
     const [spin, setSpin] = useState(0);
 
     useEffect(() => {
-        setTimeout(setSpinner, 10);
+        if(mountedRef.current)
+            setTimeout(setSpinner, 10);
     }, [spin]);
+
+    //https://stackoverflow.com/questions/56450975/to-fix-cancel-all-subscriptions-and-asynchronous-tasks-in-a-useeffect-cleanup-f
+    useEffect(() => {
+        return () => {mountedRef.current = false};
+    }, []);
 
     const text = useMemo(() => {
         switch(item) {
@@ -56,6 +64,8 @@ export function ScanModal(props : {item: string | null, visible: boolean, setVis
                 return "Not recyclable, unfortunately. I know how much you want to save the planet.";
             case "white-glass":
                 return "White glass is recyclable. Just make sure it doesn't break on the way down.";
+            default:
+                return "";
         }
     }, [item]);
 
@@ -65,10 +75,6 @@ export function ScanModal(props : {item: string | null, visible: boolean, setVis
 
     function onClose() {
         setVisible(!visible);
-    }
-
-    function prettyName(name: string) {
-        return name.substring(0,1).toUpperCase() + name.substring(1);
     }
 
     return (
@@ -86,11 +92,7 @@ export function ScanModal(props : {item: string | null, visible: boolean, setVis
 
                     {
                         item && img ?
-                            <View style={baseStyles.container}>
-                                <Image source={img} style={styles.image} width={10} height={10} />
-                                <Text style={styles.infoHeader}>{prettyName(item)}</Text>
-                                <Text style={styles.infoText}>{text}</Text>
-                            </View>
+                            <ScanModalInfo text={text} item={item} img={img}/>
                             :
                             <View style={baseStyles.row}>
                                 <>
@@ -131,19 +133,5 @@ const styles = StyleSheet.create({
         marginLeft: "auto",
         marginTop: 10,
         marginRight: 10
-    },
-    image : {
-        flex: 0.4,
-        resizeMode: 'contain',
-    },
-    infoHeader: {
-        fontSize: 20,
-        textAlign: "center",
-        fontFamily: "Inter_400Regular"
-    },
-    infoText: {
-        fontSize: 15,
-        marginTop: 20,
-        fontFamily: "Inter_400Regular"
     }
 });

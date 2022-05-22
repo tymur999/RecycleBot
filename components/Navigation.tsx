@@ -11,7 +11,7 @@ import {pageNames} from "../core/pageNames";
 const height = 30;
 const width = 3;
 const size = 30;
-const iconColor = "#009637";
+const iconColor = "#93bf6c";
 
 export function Navigation() {
     return (
@@ -35,7 +35,7 @@ export function Navigation() {
 
 const styles = StyleSheet.create({
     nav: {
-        backgroundColor: "#4ae333",
+        backgroundColor: "#4e8d18",
         alignItems: "center",
         borderTopColor: "silver",
         borderTopWidth: 3
