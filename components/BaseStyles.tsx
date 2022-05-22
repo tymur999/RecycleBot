@@ -3,9 +3,11 @@ import {StyleSheet} from "react-native";
 export const baseStyles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
+        flexDirection: "column",
+        marginLeft: 15,
+        marginRight: 15
     },
     textCenter: {
         textAlign: "center"
