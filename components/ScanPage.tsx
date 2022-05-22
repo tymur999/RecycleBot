@@ -9,9 +9,6 @@ import { Alert, Modal } from 'react-native';
 import {faSpinner} from "@fortawesome/free-solid-svg-icons/faSpinner";
 import {baseStyles} from "./BaseStyles";
 import {faTimes} from "@fortawesome/free-solid-svg-icons/faTimes";
-import * as tf from '@tensorflow/tfjs';
-import {LayersModel} from "@tensorflow/tfjs";
-import {asyncStorageIO, bundleResourceIO} from "@tensorflow/tfjs-react-native";
 
 export function ScanPage() {
     const [cameraPerms, setCameraPerms] = useState<boolean | null>(null);
@@ -21,22 +18,12 @@ export function ScanPage() {
     const [spin, setSpin] = useState(0);
     const cameraRef = useRef<Camera>(null);
 
-    const [model, setModel] = useState<LayersModel | null>(null);
-
     useEffect(() => {
         Camera
             .requestCameraPermissionsAsync()
             .then(res => {
                 setCameraPerms(res.status == 'granted');
             });
-            const modelJson = require("../assets/model.json");
-            const modelWeights = require("../assets/group1-shard1of1.bin");
-
-            tf.loadLayersModel(bundleResourceIO(modelJson, modelWeights))
-            .then(r => {
-                setModel(r);
-            });
-
     }, []);
 
     useEffect(() => {
@@ -60,7 +47,12 @@ export function ScanPage() {
         if(!cam)
             return;
         const options: CameraPictureOptions = {quality: 1, base64: true};
-        await cam.takePictureAsync(options);
+        const data = await cam.takePictureAsync(options);
+        const body = {image: data};
+        await fetch("http://10.0.0.96:3000", {
+            body: JSON.stringify(body),
+            method: "POST"
+        })
         setModalVisible(true);
         setProcessing(true);
     }
